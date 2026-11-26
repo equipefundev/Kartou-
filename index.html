@@ -4,26 +4,100 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0b0e">
-  <meta name="description" content="Organize baterias de kart e sorteie karts sem complicação.">
-  <title>Kartou! — Sorteio de baterias</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="auth.css">
+  <meta name="description" content="Kartou! é a ferramenta gratuita da Fundev para organizar eventos de kart, sortear karts e compartilhar resultados.">
+  <title>Kartou! — Sorteios de kart simples e transparentes</title>
+  <link rel="icon" href="Assets/image/Kartou! - whitelogo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" href="Assets/image/Kartou! - whitelogo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="Kartou! início"><img class="brand-logo" src="Assets/image/Kartou! - whitelogo.png" alt=""></a>
-      <div class="topbar-right"><span class="local-badge" id="accountBadge" hidden></span><button class="text-button" id="resetDemo" title="Apagar os dados desta conta" hidden>↻ <span>Apagar dados</span></button><button class="text-button" id="signOut" hidden>Sair</button></div>
+  <div class="landing-shell">
+    <header class="landing-header">
+      <a class="landing-brand" href="#inicio" aria-label="Kartou! início"><img src="Assets/image/Kartou! - whitelogo.png" alt="Kartou!"></a>
+      <nav class="landing-nav" aria-label="Navegação principal">
+        <a href="#recursos">Recursos</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#fundev">Sobre a Fundev</a>
+      </nav>
+      <a class="landing-button landing-button-small" href="kartou.html">Acessar ferramenta <span aria-hidden="true">↗</span></a>
     </header>
-    <main id="main" class="main-content"></main>
+
+    <main>
+      <section class="hero" id="inicio">
+        <div class="hero-copy">
+          <div class="hero-kicker"><span></span> Ferramenta gratuita para kartismo</div>
+          <h1>Organize suas baterias.<br><em>Sorteie com confiança.</em></h1>
+          <p class="hero-description">Pilotos, karts e resultados no mesmo lugar. O Kartou! deixa a organização do seu evento mais rápida, clara e tranquila.</p>
+          <div class="hero-actions">
+            <a class="landing-button" href="kartou.html">Acessar o Kartou! <span aria-hidden="true">↗</span></a>
+            <a class="landing-button landing-button-outline" href="#mobile">App mobile <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-footnote"><span class="check-mark">✓</span> Gratuito para organizar seus eventos</div>
+        </div>
+
+        <div class="hero-stage" aria-label="Prévia de um sorteio de karts">
+          <div class="track track-one"></div><div class="track track-two"></div>
+          <div class="race-card">
+            <div class="race-card-top"><span class="race-status"><i></i> SORTEIO PRONTO</span><span class="race-flag">🏁</span></div>
+            <div class="race-title">Copa de sábado</div>
+            <div class="race-meta">BATERIA 01 <span>·</span> 3 PILOTOS</div>
+            <div class="race-divider"></div>
+            <div class="race-row"><span class="race-index">01</span><span class="race-driver">Ana Costa</span><strong>Kart 07</strong></div>
+            <div class="race-row"><span class="race-index">02</span><span class="race-driver">Bruno Lima</span><strong>Kart 12</strong></div>
+            <div class="race-row"><span class="race-index">03</span><span class="race-driver">Caio Mendes</span><strong>Kart 03</strong></div>
+            <div class="race-card-bottom"><span>Resultado organizado</span><span class="result-dot">●</span></div>
+          </div>
+          <div class="stage-tag"><span>↗</span> Justo para todo mundo</div>
+          <div class="stage-glow"></div>
+        </div>
+      </section>
+
+      <section class="value-strip" aria-label="Vantagens do Kartou!">
+        <div><strong>01</strong><span>Organização em minutos</span></div>
+        <div><strong>02</strong><span>Sorteios sem repetição</span></div>
+        <div><strong>03</strong><span>Histórico sempre à mão</span></div>
+        <div><strong>04</strong><span>Compartilhe o resultado</span></div>
+      </section>
+
+      <section class="features-section" id="recursos">
+        <div class="section-heading"><div><div class="section-kicker">Tudo para sua bateria</div><h2>Menos planilha.<br><em>Mais pista.</em></h2></div><p>Uma ferramenta objetiva para quem organiza campeonatos, encontros e eventos de kart.</p></div>
+        <div class="feature-grid">
+          <article class="feature-card"><span class="feature-icon">01</span><h3>Crie eventos</h3><p>Cadastre cada bateria com nome, data e local. Seus eventos ficam organizados em uma lista simples.</p></article>
+          <article class="feature-card"><span class="feature-icon">02</span><h3>Prepare as listas</h3><p>Adicione ou importe os pilotos e cadastre os karts disponíveis para a bateria.</p></article>
+          <article class="feature-card feature-card-highlight"><span class="feature-icon">03</span><h3>Sorteie com clareza</h3><p>Faça o sorteio automático e veja na hora qual kart ficou com cada piloto, sem repetição na bateria.</p></article>
+          <article class="feature-card"><span class="feature-icon">04</span><h3>Guarde e compartilhe</h3><p>Consulte sorteios anteriores e envie os resultados por WhatsApp ou exporte em PDF.</p></article>
+        </div>
+      </section>
+
+      <section class="steps-section" id="como-funciona">
+        <div class="steps-heading"><div class="section-kicker">Fácil de usar</div><h2>Da lista ao grid<br><em>em poucos passos.</em></h2><a class="text-link" href="kartou.html">Começar agora <span aria-hidden="true">↗</span></a></div>
+        <div class="steps-list">
+          <div class="step"><span>01</span><div><h3>Monte seu evento</h3><p>Dê um nome para a bateria e informe data e pista.</p></div></div>
+          <div class="step"><span>02</span><div><h3>Inclua pilotos e karts</h3><p>Cadastre os nomes ou importe uma lista para agilizar.</p></div></div>
+          <div class="step"><span>03</span><div><h3>Faça o sorteio</h3><p>Confira o resultado, salve no histórico e compartilhe com a turma.</p></div></div>
+        </div>
+      </section>
+
+      <section class="mobile-section" id="mobile">
+        <img class="mobile-logo" src="Assets/image/Kartou!- logo Mobile.png" alt="Kartou! para dispositivos móveis">
+        <div><div class="section-kicker">Na pista e no bolso</div><h2>O Kartou! mobile<br><em>está chegando.</em></h2><p>Estamos preparando a versão para celular. Enquanto isso, use a ferramenta pelo navegador em qualquer dispositivo.</p></div>
+        <div class="mobile-actions"><a class="landing-button" href="kartou.html">Usar no navegador <span aria-hidden="true">↗</span></a><button class="landing-button landing-button-disabled" type="button" disabled>Download mobile em breve</button></div>
+      </section>
+
+      <section class="fundev-section" id="fundev">
+        <div class="fundev-brand"><div class="section-kicker">Desenvolvido por</div><img class="fundev-logo" src="Assets/image/Fundev Logo_white.png" alt="Fundev"><p>Somos uma equipe de desenvolvimento de software e games. Criamos soluções digitais para transformar ideias em produtos que funcionam.</p></div>
+        <a class="fundev-link" href="https://fundev.com.br" target="_blank" rel="noopener noreferrer">Conheça a Fundev <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer class="landing-footer">
+      <a class="footer-brand" href="#inicio"><img src="Assets/image/Kartou! - whitelogo.png" alt="Kartou!"></a>
+      <span>Gratuito para organizar seus eventos de kart.</span>
+      <span>Desenvolvido por <a href="https://fundev.com.br" target="_blank" rel="noopener noreferrer">Fundev</a> · © <span id="year"></span> Todos os direitos reservados.</span>
+    </footer>
   </div>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <dialog id="modal" class="modal"><form method="dialog" class="modal-card" id="modalForm"><button class="modal-close" type="button" data-modal-close aria-label="Fechar">×</button><div id="modalContent"></div></form></dialog>
-  <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
+  <script>document.querySelector('#year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
