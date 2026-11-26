@@ -6,10 +6,20 @@ let toastTimer;
 let authReady = false;
 let authMode = 'login';
 let currentUser = null;
+let localMode = false;
 let firebaseRuntime = null;
 let cloudLoadError = false;
 
 function persist() {
+  if (localMode) {
+    try {
+      localStorage.setItem('kartou-v1', JSON.stringify(state));
+    } catch (error) {
+      console.error('Falha ao salvar os dados neste dispositivo.', error);
+      notify('Não foi possível salvar. O armazenamento do dispositivo pode estar cheio.');
+    }
+    return;
+  }
   if (!currentUser || !firebaseRuntime) return;
   const { db, firestore } = firebaseRuntime;
   firestore.setDoc(firestore.doc(db, 'users', currentUser.uid, 'kartou', 'data'), {
@@ -34,7 +44,7 @@ function renderAuth() {
   const setupMessage = !firebaseRuntime
     ? '<p class="auth-setup">O serviço de contas ainda precisa ser conectado ao projeto Firebase. Consulte <strong>FIREBASE_SETUP.md</strong> para ativar o login e a sincronização.</p>'
     : '';
-  return `<section class="auth-layout"><div class="auth-copy"><div class="eyebrow">Kartou! na pista</div><h1 class="auth-title">Seus eventos.<br>Em qualquer dispositivo.</h1><p>Entre para manter eventos, pilotos, karts e resultados sincronizados na sua conta.</p></div><div class="auth-card"><div class="auth-switch"><button class="tab ${!creating?'active':''}" data-auth-mode="login">Entrar</button><button class="tab ${creating?'active':''}" data-auth-mode="signup">Criar conta</button></div><h2>${creating?'Crie sua conta':'Bem-vindo de volta'}</h2><p class="auth-subtitle">${creating?'Use seu e-mail para começar.':'Acesse seus eventos e sorteios salvos.'}</p>${setupMessage}<form id="authForm" class="form-stack"><label><span class="input-label">E-mail</span><input class="input" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></label><label><span class="input-label">Senha</span><input class="input" name="password" type="password" autocomplete="${creating?'new-password':'current-password'}" minlength="6" required placeholder="Mínimo de 6 caracteres"></label>${creating?'<label><span class="input-label">Confirmar senha</span><input class="input" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="Digite a senha novamente"></label>':''}<button class="btn btn-primary btn-wide" type="submit">${creating?'Criar conta':'Entrar com e-mail'}</button></form>${!creating?'<button class="link-button auth-forgot" data-auth-action="reset-password">Esqueci minha senha</button>':''}<div class="auth-divider"><span>ou</span></div><button class="btn btn-secondary btn-wide auth-google" data-auth-action="google"><span aria-hidden="true">G</span> Continuar com Google</button><p class="auth-feedback" id="authFeedback" role="status" aria-live="polite"></p></div></section>`;
+  return `<section class="auth-layout"><div class="auth-copy"><div class="eyebrow">Kartou! na pista</div><h1 class="auth-title">Seus eventos.<br>Em qualquer dispositivo.</h1><p>Entre para manter eventos, pilotos, karts e resultados sincronizados na sua conta.</p></div><div class="auth-card"><div class="auth-switch"><button class="tab ${!creating?'active':''}" data-auth-mode="login">Entrar</button><button class="tab ${creating?'active':''}" data-auth-mode="signup">Criar conta</button></div><h2>${creating?'Crie sua conta':'Bem-vindo de volta'}</h2><p class="auth-subtitle">${creating?'Use seu e-mail para começar.':'Acesse seus eventos e sorteios salvos.'}</p>${setupMessage}<form id="authForm" class="form-stack"><label><span class="input-label">E-mail</span><input class="input" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></label><label><span class="input-label">Senha</span><input class="input" name="password" type="password" autocomplete="${creating?'new-password':'current-password'}" minlength="6" required placeholder="Mínimo de 6 caracteres"></label>${creating?'<label><span class="input-label">Confirmar senha</span><input class="input" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="Digite a senha novamente"></label>':''}<button class="btn btn-primary btn-wide" type="submit">${creating?'Criar conta':'Entrar com e-mail'}</button></form>${!creating?'<button class="link-button auth-forgot" data-auth-action="reset-password">Esqueci minha senha</button>':''}<div class="auth-divider"><span>ou</span></div><button class="btn btn-secondary btn-wide auth-google" data-auth-action="google"><span aria-hidden="true">G</span> Continuar com Google</button><p class="auth-feedback" id="authFeedback" role="status" aria-live="polite"></p>${!creating?'<div class="guest-access"><span>Prefere salvar apenas neste aparelho?</span><button class="link-button" data-auth-action="guest-confirm">Continuar sem conta</button></div>':''}</div></section>`;
 }
 function render() {
   const main = document.querySelector('#main');
@@ -42,6 +52,14 @@ function render() {
   const resetButton = document.querySelector('#resetDemo');
   const signOutButton = document.querySelector('#signOut');
   if (!authReady) { main.innerHTML = '<section class="auth-loading">Conectando ao Kartou!…</section>'; return; }
+  if (localMode) {
+    badge.hidden = false; badge.innerHTML = '<i></i> Salvo neste dispositivo';
+    resetButton.hidden = false; signOutButton.hidden = false;
+    resetButton.title = 'Apagar os dados salvos neste dispositivo';
+    currentEventId && !getEvent() ? currentEventId = null : null;
+    main.innerHTML = currentEventId ? renderEvent() : renderEvents();
+    return;
+  }
   if (!currentUser) {
     badge.hidden = true; resetButton.hidden = true; signOutButton.hidden = true;
     main.innerHTML = renderAuth();
@@ -49,6 +67,7 @@ function render() {
   }
   badge.hidden = false; badge.innerHTML = `<i></i> ${escapeHTML(currentUser.email || 'Conta conectada')}`;
   resetButton.hidden = false; signOutButton.hidden = false;
+  resetButton.title = 'Apagar os dados desta conta';
   if (cloudLoadError) {
     main.innerHTML = '<section class="auth-loading"><h2>Não foi possível carregar seus dados</h2><p>Confira a conexão e as regras do Firestore antes de continuar.</p><button class="btn btn-primary" data-auth-action="retry-cloud">Tentar novamente</button> <button class="btn btn-secondary" data-auth-action="signout">Sair</button></section>';
     return;
@@ -94,6 +113,7 @@ async function initializeAuth() {
     firebaseRuntime = { appSdk, authSdk, firestore, auth, db, googleProvider };
     authSdk.onAuthStateChanged(auth, async user => {
       currentUser = user;
+      if (user) localMode = false;
       currentEventId = null; draftResult = null;
       if (!user) { state = { events: [] }; cloudLoadError = false; authReady = true; render(); return; }
       authReady = false; render();
@@ -196,6 +216,8 @@ document.addEventListener('click',event=>{
  const target=event.target.closest('button,[data-open],[data-action],[data-tab],[data-auth-mode],[data-auth-action],[data-edit-pilot],[data-edit-kart],[data-remove-pilot],[data-remove-kart],[data-history-pdf],[data-history-share],[data-history-delete]');if(!target)return;
  if(target.dataset.authMode){authMode=target.dataset.authMode;render();return;}
  if(target.dataset.authAction==='google'){signInWithGoogle();return;}
+ if(target.dataset.authAction==='guest-confirm'){setModal('<h2 class="modal-title">Continuar sem conta?</h2><p class="modal-desc">Seus eventos, pilotos, karts e resultados serão salvos somente neste dispositivo. Para acessar seus dados em outros aparelhos, crie uma conta ou entre nela.</p><div class="modal-actions"><button class="btn btn-ghost" type="button" data-modal-close>Voltar</button><button class="btn btn-primary" type="button" data-auth-action="guest-enter">Continuar sem conta</button></div>');return;}
+ if(target.dataset.authAction==='guest-enter'){state=loadLegacyState();currentUser=null;localMode=true;currentEventId=null;draftResult=null;closeModal();render();return;}
  if(target.dataset.authAction==='signout'){firebaseRuntime?.authSdk.signOut(firebaseRuntime.auth);return;}
  if(target.dataset.authAction==='retry-cloud'&&currentUser){cloudLoadError=false;authReady=false;render();firebaseRuntime.firestore.getDoc(firebaseRuntime.firestore.doc(firebaseRuntime.db,'users',currentUser.uid,'kartou','data')).then(snapshot=>{const data=snapshot.exists()?snapshot.data():null;state={events:Array.isArray(data?.events)?data.events:[]};cloudLoadError=false;authReady=true;render();}).catch(error=>{console.error('Falha ao carregar os dados da conta.',error);cloudLoadError=true;authReady=true;render();});return;}
  if(target.dataset.authAction==='reset-password'){
@@ -215,7 +237,7 @@ document.addEventListener('click',event=>{
  if(target.dataset.historyPdf||target.dataset.historyShare||target.dataset.historyDelete){const result=getEvent().history.find(x=>x.id===target.dataset.historyPdf||x.id===target.dataset.historyShare||x.id===target.dataset.historyDelete);if(target.dataset.historyPdf)exportPDF(result,getEvent());if(target.dataset.historyShare)shareResult(result,getEvent());if(target.dataset.historyDelete)confirmDelete('Excluir resultado?',`O resultado da bateria ${result.number} será removido do histórico.`,()=>{getEvent().history=getEvent().history.filter(x=>x.id!==result.id);persist();render();});}
 });
 document.addEventListener('submit',event=>{const form=event.target;if(form.id==='authForm'){event.preventDefault();handleAuthSubmit(form);return;}if(form.id!=='addPilotForm'&&form.id!=='addKartForm')return;event.preventDefault();const type=form.id==='addPilotForm'?'pilots':'karts';const input=form.elements.name;const value=input.value.trim();const list=getEvent()[type];if(list.some(x=>x.toLocaleLowerCase('pt-BR')===value.toLocaleLowerCase('pt-BR'))){notify('Esse nome já está cadastrado.');return;}list.push(value);persist();render();notify(type==='pilots'?'Piloto adicionado':'Kart adicionado');});
-document.querySelector('#resetDemo').addEventListener('click',()=>confirmDelete('Apagar dados desta conta?', 'Todos os eventos, pilotos, karts e históricos salvos na sua conta serão apagados.',()=>{state.events=[];persist();currentEventId=null;draftResult=null;render();notify('Dados da conta apagados');}));
-document.querySelector('#signOut').addEventListener('click',()=>firebaseRuntime?.authSdk.signOut(firebaseRuntime.auth));
+document.querySelector('#resetDemo').addEventListener('click',()=>{const local=localMode;confirmDelete(local?'Apagar dados deste dispositivo?':'Apagar dados desta conta?',local?'Todos os eventos, pilotos, karts e históricos salvos neste dispositivo serão apagados.':'Todos os eventos, pilotos, karts e históricos salvos na sua conta serão apagados.',()=>{state.events=[];persist();currentEventId=null;draftResult=null;render();notify(local?'Dados locais apagados':'Dados da conta apagados');});});
+document.querySelector('#signOut').addEventListener('click',()=>{if(localMode){localMode=false;state={events:[]};currentEventId=null;draftResult=null;render();return;}firebaseRuntime?.authSdk.signOut(firebaseRuntime.auth);});
 document.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.target.matches('[data-open]'))event.target.click();});
 initializeAuth();
